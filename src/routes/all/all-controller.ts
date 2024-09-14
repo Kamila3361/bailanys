@@ -151,8 +151,6 @@ class AllController{
     ratePsychologist = async (req: Request, res: Response): Promise<void> => {
         try {
             const customReq = req as CustomRequest;
-            const userId = customReq.user?.id;
-            const user = await UserModel.findById(userId);
             const {id, rate} = customReq.body;
             
             const psychologist = await Psychologist.findById(id);
@@ -162,7 +160,7 @@ class AllController{
                 return;
             }
             
-            psychologist.score = rate;
+            psychologist.score = (psychologist.score + Number(rate)) / 2;
             await psychologist.save();
             res.status(200).json(psychologist);
         } catch (err) {
