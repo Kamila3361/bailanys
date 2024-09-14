@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { uploadFile } from "../../middlewares/s-3.middlerware";
 import UserModel from "../auth/models/User";
 import { Event } from "./models/Event";
+import { Psychologist } from "./models/Psychologist";
 
 interface CustomRequest extends Request {
     user?: User;
@@ -101,6 +102,74 @@ class AllController{
             res.status(500).json({ message: 'Error adding event' })
         }
     }
+
+    getPsychologists = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const psychologists = await Psychologist.find();
+            res.status(200).json(psychologists);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message: 'Error getting all psychologists' })
+        }
+    }
+
+    addPsychologist = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const customReq = req as CustomRequest;
+            const userId = customReq.user?.id;
+            const user = await UserModel.findById(userId);
+
+            if (!customReq.files?.image) {
+                res.status(400).json({ message: "File is required" });
+            }
+            const fileKey = `${uuidv4()}-${req.body.name}`;
+            const uploadParams = {
+                bucketName: process.env.AWS_BUCKET_NAME!,
+                key: fileKey,
+                file: req.files?.image,
+                content: 'image/jpeg'
+            };
+
+            const posterLocation = await uploadFile(uploadParams);
+
+            const psychologist = new Psychologist({
+                name: req.body.name,
+                email: user?.email,
+                phoneNumber: user?.phoneNumber,
+                image_location: posterLocation.Location,
+                description: req.body.description
+            });
+
+            await psychologist.save();
+            res.status(201).json(psychologist);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message: 'Error adding psychologist' })
+        }
+    }
+
+    ratePsychologist = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const customReq = req as CustomRequest;
+            const userId = customReq.user?.id;
+            const user = await UserModel.findById(userId);
+            const {id, rate} = customReq.body;
+            
+            const psychologist = await Psychologist.findById(id);
+
+            if (!psychologist) {
+                res.status(404).json({ message: 'Psychologist not found' });
+                return;
+            }
+            
+            psychologist.score = rate;
+            await psychologist.save();
+            res.status(200).json(psychologist);
+        } catch (err) {
+            res.status(500).json({ message: 'Error rating psychologist' })
+        }
+    }    
+
 }
 
 export default AllController;
