@@ -6,6 +6,7 @@ import { uploadFile } from "../../middlewares/s-3.middlerware";
 import UserModel from "../auth/models/User";
 import { Event } from "./models/Event";
 import { Psychologist } from "./models/Psychologist";
+import { Mentor } from "./models/Mentor";
 
 interface CustomRequest extends Request {
     user?: User;
@@ -168,6 +169,70 @@ class AllController{
         }
     }    
 
+    getMentors = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const mentors = await Mentor.find();
+            res.status(200).json(mentors);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message: 'Error getting all mentors' })
+        }
+    }
+
+    addMentor = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const customReq = req as CustomRequest;
+            const userId = customReq.user?.id;
+            const user = await UserModel.findById(userId);
+
+            if (!customReq.files?.image) {
+                res.status(400).json({ message: "File is required" });
+            }
+            const fileKey = `${uuidv4()}-${req.body.name}`;
+            const uploadParams = {
+                bucketName: process.env.AWS_BUCKET_NAME!,
+                key: fileKey,
+                file: req.files?.image,
+                content: 'image/jpeg'
+            };
+
+            const posterLocation = await uploadFile(uploadParams);
+
+            const mentor = new Mentor({
+                name: req.body.name,
+                email: user?.email,
+                phoneNumber: user?.phoneNumber,
+                image_location: posterLocation.Location,
+                description: req.body.description
+            });
+
+            await mentor.save();
+            res.status(201).json(mentor);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message: 'Error adding psychologist' })
+        }
+    }
+
+    rateMentor = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const customReq = req as CustomRequest;
+            const {id, rate} = customReq.body;
+            
+            const mentor = await Mentor.findById(id);
+
+            if (!mentor) {
+                res.status(404).json({ message: 'Mentor not found' });
+                return;
+            }
+            
+            mentor.score = (mentor.score + Number(rate)) / 2;
+            await mentor.save();
+            res.status(200).json(mentor);
+        } catch (err) {
+            res.status(500).json({ message: 'Error rating psychologist' })
+        }
+    }    
 }
 
 export default AllController;
