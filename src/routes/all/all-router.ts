@@ -16,4 +16,6 @@ allRouter.post("/add-mentor", authMiddleware, allController.addMentor);
 allRouter.get("/mentors", authMiddleware, allController.getMentors);
 allRouter.post("/rate-mentor", authMiddleware, allController.rateMentor);
 
+// allRouter.get("/change", allController.change);
+
 export default allRouter;

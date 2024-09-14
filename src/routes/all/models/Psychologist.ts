@@ -8,6 +8,7 @@ export interface IPsychologist extends Document {
     description: string;
     status: 'active' | 'inactive';
     score: number;
+    experience: number;
 }
 
 const PsychologistSchema: Schema = new Schema({
@@ -17,7 +18,8 @@ const PsychologistSchema: Schema = new Schema({
     image_location: {type: String, required: true},
     description: {type: String, required: true},
     status: {type: String, default: 'active'},
-    score: {type: Number, default: 5}
+    score: {type: Number, default: 5},
+    experience: {type: Number, required: true}
 });
 
 export const Psychologist = mongoose.model<IPsychologist>("Psychologist", PsychologistSchema);

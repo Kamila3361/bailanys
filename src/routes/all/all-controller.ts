@@ -138,7 +138,8 @@ class AllController{
                 email: user?.email,
                 phoneNumber: user?.phoneNumber,
                 image_location: posterLocation.Location,
-                description: req.body.description
+                description: req.body.description,
+                experience: req.body.experience
             });
 
             await psychologist.save();
@@ -203,7 +204,8 @@ class AllController{
                 email: user?.email,
                 phoneNumber: user?.phoneNumber,
                 image_location: posterLocation.Location,
-                description: req.body.description
+                description: req.body.description,
+                field: req.body.field
             });
 
             await mentor.save();
@@ -233,6 +235,24 @@ class AllController{
             res.status(500).json({ message: 'Error rating psychologist' })
         }
     }    
+
+    change = async (req: Request, res: Response): Promise<void> => {
+        try{
+            const mentors = await Mentor.find();
+            for(const mentor of mentors){
+                mentor.field = "Mathematics";
+                await mentor.save();
+            }
+            const psychologists = await Psychologist.find();
+            for(const psychologist of psychologists){
+                psychologist.experience = 5;
+                await psychologist.save();
+            }
+            res.status(200).json({message: "Changed"});
+        }catch(err){
+            console.log(err)
+        }
+    }
 }
 
 export default AllController;

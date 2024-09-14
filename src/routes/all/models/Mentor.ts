@@ -8,6 +8,7 @@ export interface IMentor extends Document {
   description: string;
   status: 'active' | 'inactive';
   score: number;
+  field: string;
 }
 
 const MentorSchema: Schema = new Schema({
@@ -17,7 +18,8 @@ const MentorSchema: Schema = new Schema({
   image_location: {type: String, required: true},
   description: {type: String, required: true},
   status: {type: String, default: 'active'},
-  score: {type: Number, default: 5}
+  score: {type: Number, default: 5},
+  field: {type: String, required: true}
 });
 
 export const Mentor = mongoose.model<IMentor>("Mentor", MentorSchema);
