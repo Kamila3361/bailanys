@@ -55,7 +55,7 @@ class AuthService {
 
   private generateJwt(user: IUser): string {
     return jwt.sign({ id: user._id, email: user.email }, this.jwtSecret, {
-      expiresIn: '1h'
+      expiresIn: '7d'
     })
   }
 
