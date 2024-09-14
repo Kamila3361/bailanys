@@ -7,7 +7,8 @@ const allController = new AllController();
 
 allRouter.get("/pets", authMiddleware, allController.getPets);
 allRouter.post("/add-pet", authMiddleware, allController.addPet);
-
+allRouter.get("/events", authMiddleware, allController.getEvents);
+allRouter.post("/add-event", authMiddleware, allController.addEvent);
 
 
 export default allRouter;
