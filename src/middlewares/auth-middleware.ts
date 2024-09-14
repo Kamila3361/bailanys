@@ -3,6 +3,14 @@ import AuthService from '../routes/auth/auth-service'
 
 const authService = new AuthService()
 
+export interface User {
+  id: string;
+  email: string;
+  iat: number;
+  exp: number;
+}
+
+
 export const authMiddleware = (
   req: Request,
   res: Response,
