@@ -15,6 +15,10 @@ allRouter.post("/rate-psychologist", authMiddleware, allController.ratePsycholog
 allRouter.post("/add-mentor", authMiddleware, allController.addMentor);
 allRouter.get("/mentors", authMiddleware, allController.getMentors);
 allRouter.post("/rate-mentor", authMiddleware, allController.rateMentor);
+allRouter.post("/add-bookClub", authMiddleware, allController.addBookClub);
+allRouter.get("/bookClubs", authMiddleware, allController.getBookClubs);
+allRouter.get("/online", authMiddleware, allController.getOnlineBookClubs);
+allRouter.get("/offline", authMiddleware, allController.getOfflineBookClubs);
 
 // allRouter.get("/change", allController.change);
 

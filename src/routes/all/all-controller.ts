@@ -7,6 +7,7 @@ import UserModel from "../auth/models/User";
 import { Event } from "./models/Event";
 import { Psychologist } from "./models/Psychologist";
 import { Mentor } from "./models/Mentor";
+import { BookClub } from "./models/BookClub";
 
 interface CustomRequest extends Request {
     user?: User;
@@ -251,6 +252,83 @@ class AllController{
             res.status(200).json({message: "Changed"});
         }catch(err){
             console.log(err)
+        }
+    }
+
+    getBookClubs = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const bookClubs = await BookClub.find();
+            res.status(200).json(bookClubs);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message: 'Error getting all book clubs' })
+        }
+    }
+
+    addBookClub = async (req: Request, res: Response): Promise<void> => {
+        try {
+            if (!req.files?.image && !req.files?.bookimage) {
+                res.status(400).json({ message: "File is required" });
+            }
+            const fileKey = `${uuidv4()}-${req.body.name}`;
+            const bookImage = `${uuidv4()}-${req.body.current_book}`;
+
+            const uploadParams = {
+                bucketName: process.env.AWS_BUCKET_NAME!,
+                key: fileKey,
+                file: req.files?.image,
+                content: 'image/jpeg'
+            };
+
+            const uploadParamsBook = {
+                bucketName: process.env.AWS_BUCKET_NAME!,
+                key: bookImage,
+                file: req.files?.bookimage,
+                content: 'image/jpeg'
+            };
+
+            const posterLocation = await uploadFile(uploadParams);
+            const bookImageLocation = await uploadFile(uploadParamsBook);
+
+            const bookClub = new BookClub({
+                name: req.body.name,
+                description: req.body.description,
+                location: req.body.location,
+                member_count: req.body.member_count,
+                image_location: posterLocation.Location,
+                current_book: req.body.current_book,
+                current_book_image: bookImageLocation.Location
+            });
+
+            await bookClub.save();
+            res.status(201).json(bookClub);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message: 'Error adding book club' })
+        }
+    }
+
+    getOnlineBookClubs = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const bookClubs = await BookClub.find({location: 'Online'});
+            res.status(200).json(bookClubs);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message: 'Error getting all book clubs' })
+        }
+    }
+
+    getOfflineBookClubs = async (req: Request, res: Response): Promise<void> => {
+        try {
+            //location is not online
+            const bookClubs = await BookClub.find({location: {$ne: 'Online'}});
+            if (bookClubs.length === 0) {
+                res.status(404).json({ message: 'No offline book clubs found' });
+            }
+            res.status(200).json(bookClubs);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message: 'Error getting all book clubs' })
         }
     }
 }
